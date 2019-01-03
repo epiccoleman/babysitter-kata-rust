@@ -1,0 +1,7 @@
+[package]
+name = "babysitter"
+version = "0.1.0"
+authors = ["Eric Coleman <eric@epiccoleman.com>"]
+edition = "2018"
+
+[dependencies]
