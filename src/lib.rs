@@ -3,14 +3,12 @@
 use std::collections::HashMap;
 use std::ops::Range;
 
-// TODO: remove
 #[allow(dead_code)]
 pub struct BabysittingJob {
     start_time: i32,
     end_time: i32,
 }
 
-// TODO: remove
 #[allow(dead_code)]
 impl BabysittingJob {
     fn is_valid(&self) -> bool {
@@ -28,7 +26,7 @@ impl BabysittingJob {
 
     fn calculate_pay(&self, family: &Family) -> i32 {
         let mut pay = 0;
-        if (self.start_time < self.end_time){ // shouldn't need any wrapping?
+        if self.start_time < self.end_time {
             for hour in self.start_time..self.end_time {
                 pay += &family.rate_for_hour(hour)
             }
@@ -39,7 +37,6 @@ impl BabysittingJob {
             for hour in 0..self.end_time {
                 pay += &family.rate_for_hour(hour)
             }
-
         }
         pay
     }
@@ -48,19 +45,16 @@ impl BabysittingJob {
 #[allow(dead_code)]
 struct Family {
     name: String,
-    rates: HashMap<Range<i32>, i32>
+    rates: HashMap<Range<i32>, i32>,
 }
 
 #[allow(dead_code)]
 impl Family {
     fn new(name: String, rates: HashMap<Range<i32>, i32>) -> Family {
-        Family {
-            name,
-            rates
-        }
+        Family { name, rates }
     }
 
-    fn rate_for_hour(&self, hour: i32) -> i32{
+    fn rate_for_hour(&self, hour: i32) -> i32 {
         let mut rate = 0;
         for (time_range, pay_rate) in &self.rates {
             if time_range.contains(&hour) {
@@ -70,7 +64,6 @@ impl Family {
         rate
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -175,7 +168,7 @@ mod tests {
     fn correctly_calculates_pay_when_job_crosses_day_boundary() {
         let mut rates = HashMap::<Range<i32>, i32>::new();
         rates.insert(20..24, 10);
-        rates.insert(0..5, 10);
+        rates.insert(0..4, 10);
 
         let family = Family::new("foo".to_string(), rates);
 
@@ -187,4 +180,73 @@ mod tests {
         assert_eq!(job.calculate_pay(&family), 40);
     }
 
+    #[test]
+    fn correctly_handles_pay_rate_changes(){
+        let mut rates = HashMap::<Range<i32>, i32>::new();
+        rates.insert(17..19, 15);
+        rates.insert(19..24, 20);
+
+        let family = Family::new("foo".to_string(), rates);
+
+        let job = BabysittingJob {
+            start_time: 18, end_time: 20,
+        };
+
+        assert_eq!(job.calculate_pay(&family), 35);
+
+    }
+
+    #[test]
+    fn test_family_a(){
+        // Family A pays $15 per hour before 11pm, and $20 per hour the rest of the night
+        let mut rates = HashMap::<Range<i32>, i32>::new();
+        rates.insert(17..23, 15);
+        rates.insert(23..24, 20);
+        rates.insert(0..4, 20);
+
+        let family = Family::new("A".to_string(), rates);
+
+        let job = BabysittingJob {
+            start_time: 18,
+            end_time: 2,
+        };
+
+        assert_eq!(job.calculate_pay(&family), 135);
+    }
+
+    #[test]
+    fn test_family_b(){
+        // Family B pays $12 per hour before 10pm, $8 between 10 and 12, and $16 the rest of the night
+        let mut rates = HashMap::<Range<i32>, i32>::new();
+        rates.insert(17..22, 12);
+        rates.insert(22..24, 8);
+        rates.insert(0..4, 16);
+
+        let family = Family::new("B".to_string(), rates);
+
+        let job = BabysittingJob {
+            start_time: 18,
+            end_time: 2,
+        };
+
+        assert_eq!(job.calculate_pay(&family), 96);
+    }
+
+    #[test]
+    fn test_family_c(){
+        // Family C pays $21 per hour before 9pm, then $15 the rest of the night
+        let mut rates = HashMap::<Range<i32>, i32>::new();
+        rates.insert(17..21, 21);
+        rates.insert(21..24, 15);
+        rates.insert(0..4, 15);
+
+        let family = Family::new("C".to_string(), rates);
+
+        let job = BabysittingJob {
+            start_time: 17,
+            end_time: 23,
+        };
+
+        assert_eq!(job.calculate_pay(&family), 114);
+    }
 }
