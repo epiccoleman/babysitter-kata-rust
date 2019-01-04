@@ -26,10 +26,22 @@ impl BabysittingJob {
         (self.start_time < self.end_time) || (self.end_time <= 4 && self.start_time <= 23)
     }
 
-    fn calculate_pay(family: &Family) -> i32 {
-        //range of values for hours worked
-        //map a family function across it
-        0
+    fn calculate_pay(&self, family: &Family) -> i32 {
+        let mut pay = 0;
+        if (self.start_time < self.end_time){ // shouldn't need any wrapping?
+            for hour in self.start_time..self.end_time {
+                pay += &family.rate_for_hour(hour)
+            }
+        } else {
+            for hour in self.start_time..24 {
+                pay += &family.rate_for_hour(hour)
+            }
+            for hour in 0..self.end_time {
+                pay += &family.rate_for_hour(hour)
+            }
+
+        }
+        pay
     }
 }
 
@@ -136,11 +148,43 @@ mod tests {
         assert_eq!(family.rate_for_hour(17), 10);
     }
 
+    #[test]
     fn family_pays_0_for_undefined_hours() {
         let rates = HashMap::<Range<i32>, i32>::new();
 
         let family = Family::new("foo".to_string(), rates);
         assert_eq!(family.rate_for_hour(17), 0);
+    }
+
+    #[test]
+    fn correctly_calculates_pay_when_job_does_not_cross_day_boundary() {
+        let mut rates = HashMap::<Range<i32>, i32>::new();
+        rates.insert(17..20, 10);
+
+        let family = Family::new("foo".to_string(), rates);
+
+        let job = BabysittingJob {
+            start_time: 17,
+            end_time: 19,
+        };
+
+        assert_eq!(job.calculate_pay(&family), 20);
+    }
+
+    #[test]
+    fn correctly_calculates_pay_when_job_crosses_day_boundary() {
+        let mut rates = HashMap::<Range<i32>, i32>::new();
+        rates.insert(20..24, 10);
+        rates.insert(0..5, 10);
+
+        let family = Family::new("foo".to_string(), rates);
+
+        let job = BabysittingJob {
+            start_time: 22,
+            end_time: 2,
+        };
+
+        assert_eq!(job.calculate_pay(&family), 40);
     }
 
 }
