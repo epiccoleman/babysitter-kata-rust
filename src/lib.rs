@@ -20,26 +20,64 @@ mod tests {
 
     #[test]
     fn start_time_after_5pm_is_valid() {
-        let job = BabysittingJob { start_time: 17, end_time: 19 };
+        let job = BabysittingJob {
+            start_time: 17,
+            end_time: 19,
+        };
         assert!(job.is_valid());
     }
 
     #[test]
     fn start_time_before_5pm_is_invalid() {
-        let job = BabysittingJob { start_time: 16, end_time: 20 };
+        let job = BabysittingJob {
+            start_time: 16,
+            end_time: 20,
+        };
         assert!(!job.is_valid());
     }
 
     #[test]
     fn end_time_before_4am_is_valid() {
-        let job = BabysittingJob { start_time: 0, end_time: 3 };
+        let job = BabysittingJob {
+            start_time: 0,
+            end_time: 3,
+        };
         assert!(job.is_valid());
     }
 
     #[test]
     fn end_time_after_4am_is_invalid() {
-        let job = BabysittingJob { start_time: 0, end_time: 5 };
+        let job = BabysittingJob {
+            start_time: 0,
+            end_time: 5,
+        };
         assert!(!job.is_valid());
     }
 
+    #[test]
+    fn start_time_before_end_time_is_valid() {
+        let job = BabysittingJob {
+            start_time: 17,
+            end_time: 19,
+        };
+        assert!(job.is_valid());
+    }
+
+    #[test]
+    fn start_time_before_end_time_after_midnight_is_valid() {
+        let job = BabysittingJob {
+            start_time: 17,
+            end_time: 3,
+        };
+        assert!(job.is_valid());
+    }
+
+    #[test]
+    fn start_time_after_end_time_is_invalid() {
+        let job = BabysittingJob {
+            start_time: 20,
+            end_time: 17,
+        };
+        assert!(!job.is_valid());
+    }
 }
